@@ -6,29 +6,34 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.net.URI
 
 object DatabaseFactory {
     fun init() {
-        val dbUrl = System.getenv("DATABASE_URL")
-            ?: "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;" // fallback per sviluppo locale
-
-        val driver = if (dbUrl.startsWith("jdbc:postgresql") || dbUrl.startsWith("postgresql")) {
-            "org.postgresql.Driver"
+        val envUrl = System.getenv("DATABASE_URL")
+        if (envUrl != null && envUrl.startsWith("postgres")) {
+            val uri = URI(envUrl)
+            val userInfo = uri.userInfo.split(':')
+            val username = userInfo[0]
+            val password = userInfo[1]
+            val host = uri.host
+            val port = if (uri.port != -1) uri.port else 5432
+            val db = uri.path.drop(1) // remove leading '/'
+            val query = uri.query?.let { "?$it" } ?: ""
+            val jdbcUrl = "jdbc:postgresql://$host:$port/$db$query"
+            Database.connect(
+                url = jdbcUrl,
+                driver = "org.postgresql.Driver",
+                user = username,
+                password = password
+            )
         } else {
-            "org.h2.Driver"
+            Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
         }
-        // Render/Neon forniscono una stringa tipo postgresql://user:pass@host:port/db?sslmode=require
-        // Exposed vuole jdbc:postgresql://user:pass@host:port/db?sslmode=require
-        val jdbcUrl = if (dbUrl.startsWith("postgresql://")) {
-            "jdbc:" + dbUrl
-                .replaceFirst("postgresql://", "postgresql://") // già ok
-        } else dbUrl
-
-        Database.connect(jdbcUrl, driver = driver)
         transaction {
             SchemaUtils.create(Fields, Bookings)
-            // Popola solo se usi H2 in memoria (evita duplicati su postgres!)
-            if (driver == "org.h2.Driver") {
+            // Popola solo se usi H2 in memoria
+            if (envUrl == null) {
                 Fields.insert {
                     it[name] = "Campo Calcetto"
                     it[location] = "Via per Calcata, 5, Mazzano Romano"
