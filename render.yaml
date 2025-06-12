@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ktor-app
+    env: java
+    plan: free
+    buildCommand: ./gradlew installDist
+    startCommand: ./build/install/calcettomazzano/bin/calcettomazzano
+    envVars:
+      - key: DATABASE_URL
+        sync: false
