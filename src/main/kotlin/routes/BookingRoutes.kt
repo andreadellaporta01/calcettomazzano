@@ -201,8 +201,8 @@ fun Application.bookingRoutes() {
 
             // Orari di apertura/chiusura e durata slot
             val apertura = LocalTime.of(9, 0)
-            val chiusura = LocalTime.MIDNIGHT // 00:00, rappresenta la fine della giornata
-            val durataSlot = Duration.ofMinutes(60) // slot da 1 ora
+            val chiusura = LocalTime.of(23, 0)
+            val durataSlot = Duration.ofMinutes(60)
 
             val slotLiberi = mutableListOf<FreeSlot>()
             var currentStart = apertura
