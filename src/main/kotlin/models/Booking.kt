@@ -1,7 +1,5 @@
 package it.dellapp.models
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
@@ -11,9 +9,9 @@ import org.jetbrains.exposed.sql.javatime.time
 @Serializable
 data class BookingRequest(
     val fieldId: Int,
-    @Contextual val date: LocalDate,
-    @Contextual val startTime: LocalTime,
-    @Contextual val endTime: LocalTime,
+    val date: String,
+    val startTime: String,
+    val endTime: String,
     val firstName: String,
     val lastName: String,
     val phone: String,
@@ -25,9 +23,9 @@ data class BookingRequest(
 data class BookingResponse(
     val id: Int,
     val fieldId: Int,
-    @Contextual val date: LocalDate,
-    @Contextual val startTime: LocalTime,
-    @Contextual val endTime: LocalTime,
+    val date: String,
+    val startTime: String,
+    val endTime: String,
     val firstName: String,
     val lastName: String,
     val phone: String,
@@ -37,16 +35,16 @@ data class BookingResponse(
 
 @Serializable
 data class FreeSlot(
-    @Contextual val startTime: LocalTime,
-    @Contextual val endTime: LocalTime
+    val startTime: String,
+    val endTime: String
 )
 
 @Serializable
 data class BookingUpdateRequest(
     val fieldId: Int,
-    @Contextual val date: LocalDate,
-    @Contextual val startTime: LocalTime,
-    @Contextual val endTime: LocalTime,
+    val date: String,
+    val startTime: String,
+    val endTime: String,
     val firstName: String? = null,
     val lastName: String? = null,
     val phone: String? = null,

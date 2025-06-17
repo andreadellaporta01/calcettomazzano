@@ -81,9 +81,9 @@ fun Application.bookingRoutes() {
                         BookingResponse(
                             id = it[Bookings.id],
                             fieldId = it[Bookings.fieldId],
-                            date = it[Bookings.date],
-                            startTime = it[Bookings.startTime],
-                            endTime = it[Bookings.endTime],
+                            date = it[Bookings.date].toString(),
+                            startTime = it[Bookings.startTime].toString(),
+                            endTime = it[Bookings.endTime].toString(),
                             firstName = it[Bookings.firstName],
                             lastName = it[Bookings.lastName],
                             phone = it[Bookings.phone],
@@ -114,9 +114,9 @@ fun Application.bookingRoutes() {
                 transaction {
                     Bookings.selectAll().where {
                         (Bookings.fieldId eq req.fieldId) and
-                                (Bookings.date eq req.date) and
-                                (Bookings.startTime less req.endTime) and
-                                (Bookings.endTime greater req.startTime)
+                                (Bookings.date eq LocalDate.parse(req.date)) and
+                                (Bookings.startTime less LocalTime.parse(req.endTime)) and
+                                (Bookings.endTime greater LocalTime.parse(req.startTime))
                     }.any()
                 }
             }
@@ -131,9 +131,9 @@ fun Application.bookingRoutes() {
                     transaction {
                         Bookings.insert {
                             it[fieldId] = req.fieldId
-                            it[date] = req.date
-                            it[startTime] = req.startTime
-                            it[endTime] = req.endTime
+                            it[date] = LocalDate.parse(req.date)
+                            it[startTime] = LocalTime.parse(req.startTime)
+                            it[endTime] = LocalTime.parse(req.endTime)
                             it[firstName] = req.firstName
                             it[lastName] = req.lastName
                             it[phone] = req.phone
@@ -211,11 +211,11 @@ fun Application.bookingRoutes() {
                 if (currentStart < bookedStart) {
                     var freeEnd = bookedStart
                     while (currentStart.plus(durataSlot) <= freeEnd) {
-                        slotLiberi.add(FreeSlot(currentStart, currentStart.plus(durataSlot)))
+                        slotLiberi.add(FreeSlot(currentStart.toString(), currentStart.plus(durataSlot).toString()))
                         currentStart = currentStart.plus(durataSlot)
                     }
                     if (currentStart < freeEnd) {
-                        slotLiberi.add(FreeSlot(currentStart, freeEnd))
+                        slotLiberi.add(FreeSlot(currentStart.toString(), freeEnd.toString()))
                     }
                 }
                 currentStart = maxOf(currentStart, bookedEnd)
@@ -223,11 +223,11 @@ fun Application.bookingRoutes() {
 
             // Slot liberi dopo l'ultima prenotazione fino a chiusura
             while (currentStart.plus(durataSlot) <= chiusura && currentStart < chiusura) {
-                slotLiberi.add(FreeSlot(currentStart, currentStart.plus(durataSlot)))
+                slotLiberi.add(FreeSlot(currentStart.toString(), currentStart.plus(durataSlot).toString()))
                 currentStart = currentStart.plus(durataSlot)
             }
             if (currentStart < chiusura) {
-                slotLiberi.add(FreeSlot(currentStart, chiusura))
+                slotLiberi.add(FreeSlot(currentStart.toString(), chiusura.toString()))
             }
 
             call.respond(slotLiberi)
@@ -251,10 +251,10 @@ fun Application.bookingRoutes() {
                 transaction {
                     Bookings.selectAll().where {
                         (Bookings.fieldId eq req.fieldId) and
-                                (Bookings.date eq req.date) and
+                                (Bookings.date eq LocalDate.parse(req.date)) and
                                 (Bookings.id neq bookingId) and // ignora la prenotazione stessa
-                                (Bookings.startTime less req.endTime) and
-                                (Bookings.endTime greater req.startTime)
+                                (Bookings.startTime less LocalTime.parse(req.endTime)) and
+                                (Bookings.endTime greater LocalTime.parse(req.startTime))
                     }.any()
                 }
             }
@@ -268,9 +268,9 @@ fun Application.bookingRoutes() {
                 transaction {
                     Bookings.update({ Bookings.id eq bookingId }) {
                         it[fieldId] = req.fieldId
-                        it[date] = req.date
-                        it[startTime] = req.startTime
-                        it[endTime] = req.endTime
+                        it[date] = LocalDate.parse(req.date)
+                        it[startTime] = LocalTime.parse(req.startTime)
+                        it[endTime] = LocalTime.parse(req.endTime)
                         req.firstName?.let { v -> it[firstName] = v }
                         req.lastName?.let { v -> it[lastName] = v }
                         req.phone?.let { v -> it[phone] = v }
@@ -302,9 +302,9 @@ fun Application.bookingRoutes() {
                             BookingResponse(
                                 id = it[Bookings.id],
                                 fieldId = it[Bookings.fieldId],
-                                date = it[Bookings.date],
-                                startTime = it[Bookings.startTime],
-                                endTime = it[Bookings.endTime],
+                                date = it[Bookings.date].toString(),
+                                startTime = it[Bookings.startTime].toString(),
+                                endTime = it[Bookings.endTime].toString(),
                                 firstName = it[Bookings.firstName],
                                 lastName = it[Bookings.lastName],
                                 phone = it[Bookings.phone],
