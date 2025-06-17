@@ -199,11 +199,10 @@ fun Application.bookingRoutes() {
                 }
             }
 
-            // Definisci qui gli orari di apertura/chiusura e la durata dello slot
+            // Orari di apertura/chiusura e durata slot
             val apertura = LocalTime.of(9, 0)
-            val chiusura = LocalTime.of(24, 0)
-            val durataSlot =
-                Duration.ofMinutes(60) // slot da 1 ora, cambia qui se vuoi slot da 30 minuti
+            val chiusura = LocalTime.MIDNIGHT // 00:00, rappresenta la fine della giornata
+            val durataSlot = Duration.ofMinutes(60) // slot da 1 ora
 
             val slotLiberi = mutableListOf<FreeSlot>()
             var currentStart = apertura
@@ -222,7 +221,8 @@ fun Application.bookingRoutes() {
                 currentStart = maxOf(currentStart, bookedEnd)
             }
 
-            while (currentStart.plus(durataSlot) <= chiusura) {
+            // Slot liberi dopo l'ultima prenotazione fino a chiusura
+            while (currentStart.plus(durataSlot) <= chiusura && currentStart < chiusura) {
                 slotLiberi.add(FreeSlot(currentStart, currentStart.plus(durataSlot)))
                 currentStart = currentStart.plus(durataSlot)
             }
