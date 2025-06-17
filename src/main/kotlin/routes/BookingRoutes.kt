@@ -199,37 +199,35 @@ fun Application.bookingRoutes() {
                 }
             }
 
-            // Orari di apertura/chiusura e durata slot
             val apertura = LocalTime.of(9, 0)
             val chiusura = LocalTime.of(23, 0)
             val durataSlot = Duration.ofMinutes(60)
+            val step = Duration.ofMinutes(30)
+
+            val existingIntervals = bookings.map { it.first to it.second }
+
+            // Filtro anti-slot-passato solo per oggi
+            val nowInRome = java.time.ZonedDateTime.now(java.time.ZoneId.of("Europe/Rome"))
+            val oggi = nowInRome.toLocalDate()
+            val orarioAdesso = nowInRome.toLocalTime()
 
             val slotLiberi = mutableListOf<FreeSlot>()
             var currentStart = apertura
-
-            for ((bookedStart, bookedEnd) in bookings) {
-                if (currentStart < bookedStart) {
-                    var freeEnd = bookedStart
-                    while (currentStart.plus(durataSlot) <= freeEnd) {
-                        slotLiberi.add(FreeSlot(currentStart.toString(), currentStart.plus(durataSlot).toString()))
-                        currentStart = currentStart.plus(durataSlot)
-                    }
-                    if (currentStart < freeEnd) {
-                        slotLiberi.add(FreeSlot(currentStart.toString(), freeEnd.toString()))
-                    }
+            while (currentStart.plus(durataSlot) <= chiusura) {
+                val currentEnd = currentStart.plus(durataSlot)
+                // Verifica assenza sovrapposizione con le prenotazioni esistenti
+                val overlaps = existingIntervals.any { (bStart, bEnd) ->
+                    !(currentEnd <= bStart || currentStart >= bEnd)
                 }
-                currentStart = maxOf(currentStart, bookedEnd)
-            }
+                // Filtro slot passati se la data richiesta è oggi
+                val isFutureOrTodaySlot =
+                    date != oggi || !currentStart.isBefore(orarioAdesso)
 
-            // Slot liberi dopo l'ultima prenotazione fino a chiusura
-            while (currentStart.plus(durataSlot) <= chiusura && currentStart < chiusura) {
-                slotLiberi.add(FreeSlot(currentStart.toString(), currentStart.plus(durataSlot).toString()))
-                currentStart = currentStart.plus(durataSlot)
+                if (!overlaps && isFutureOrTodaySlot) {
+                    slotLiberi.add(FreeSlot(currentStart.toString(), currentEnd.toString()))
+                }
+                currentStart = currentStart.plus(step)
             }
-            if (currentStart < chiusura) {
-                slotLiberi.add(FreeSlot(currentStart.toString(), chiusura.toString()))
-            }
-
             call.respond(slotLiberi)
         }
 
