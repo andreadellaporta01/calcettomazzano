@@ -1,12 +1,12 @@
 package it.dellapp.models
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.time
-import java.time.LocalDate
-import java.time.LocalTime
 
 @Serializable
 data class BookingRequest(
