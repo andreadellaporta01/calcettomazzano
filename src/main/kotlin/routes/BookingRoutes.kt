@@ -86,9 +86,8 @@ fun Application.bookingRoutes() {
                             endTime = it[Bookings.endTime].toString(),
                             firstName = it[Bookings.firstName],
                             lastName = it[Bookings.lastName],
-                            phone = it[Bookings.phone],
+                            code = it[Bookings.code],
                             email = it[Bookings.email],
-                            notes = it[Bookings.notes]
                         )
                     }
                 }
@@ -136,9 +135,8 @@ fun Application.bookingRoutes() {
                             it[endTime] = LocalTime.parse(req.endTime)
                             it[firstName] = req.firstName
                             it[lastName] = req.lastName
-                            it[phone] = req.phone
+                            it[code] = req.code
                             it[email] = req.email
-                            it[notes] = req.notes
                         }
                     }
                 }
@@ -241,7 +239,10 @@ fun Application.bookingRoutes() {
             val req = call.receive<BookingUpdateRequest>()
 
             if (req.startTime >= req.endTime) {
-                call.respond(HttpStatusCode.BadRequest, "L'orario di fine deve essere dopo l'inizio")
+                call.respond(
+                    HttpStatusCode.BadRequest,
+                    "L'orario di fine deve essere dopo l'inizio"
+                )
                 return@patch
             }
 
@@ -258,7 +259,10 @@ fun Application.bookingRoutes() {
             }
 
             if (conflict) {
-                call.respond(HttpStatusCode.Conflict, "Slot sovrapposto a una prenotazione esistente")
+                call.respond(
+                    HttpStatusCode.Conflict,
+                    "Slot sovrapposto a una prenotazione esistente"
+                )
                 return@patch
             }
 
@@ -271,9 +275,8 @@ fun Application.bookingRoutes() {
                         it[endTime] = LocalTime.parse(req.endTime)
                         req.firstName?.let { v -> it[firstName] = v }
                         req.lastName?.let { v -> it[lastName] = v }
-                        req.phone?.let { v -> it[phone] = v }
+                        req.code?.let { v -> it[code] = v }
                         req.email?.let { v -> it[email] = v }
-                        req.notes?.let { v -> it[notes] = v }
                     }
                 }
             }
@@ -295,7 +298,10 @@ fun Application.bookingRoutes() {
             val bookings = withContext(Dispatchers.IO) {
                 transaction {
                     Bookings.selectAll().where { Bookings.email eq email }
-                        .orderBy(Bookings.date to SortOrder.ASC, Bookings.startTime to SortOrder.ASC)
+                        .orderBy(
+                            Bookings.date to SortOrder.ASC,
+                            Bookings.startTime to SortOrder.ASC
+                        )
                         .map {
                             BookingResponse(
                                 id = it[Bookings.id],
@@ -305,9 +311,8 @@ fun Application.bookingRoutes() {
                                 endTime = it[Bookings.endTime].toString(),
                                 firstName = it[Bookings.firstName],
                                 lastName = it[Bookings.lastName],
-                                phone = it[Bookings.phone],
+                                code = it[Bookings.code],
                                 email = it[Bookings.email],
-                                notes = it[Bookings.notes]
                             )
                         }
                 }
